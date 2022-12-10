@@ -1,4 +1,3 @@
-
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -46,16 +45,6 @@ def readAll(imgPath, betPath):
         for x in range(image.shape[0]):
             for y in range(image.shape[1]):
 
-#                 if annotation[x,y,z]==3 or  annotation[x,y,z]==6:
-#                     annotation[x,y,z]=1
-
-#                 if annotation[x,y,z]==5:
-#                     annotation[x,y,z]=2
-
-#                 if annotation[x,y,z]==4:
-#                     annotation[x,y,z]=3
-
-
                 if image[x,y,z] > 200: image[x,y,z]=200
                 if image[x,y,z] < -100: image[x,y,z]=-100
     
@@ -72,19 +61,13 @@ def readAll(imgPath, betPath):
                     positions.append((i,j,k))
 #     return image, annotation
     return image, brainMask, positions, image.shape
-    
+
 
 def getPatch(image_full, brainMask, i, j, k):
     
     image, center=getCenter(image_full, brainMask, i, j, k)    
-        
     
     return image, torch.tensor([i,j,k])
-
-# NEW NPHDataset
-
-
-# OLD NPHDataset
 
 class NPHDataset(Dataset):
     def __init__(self, dataPath, betPath, name, Train=False):
@@ -139,31 +122,20 @@ class MyModel(nn.Module):
         x = self.fc(x)              
         return x
 
-
-# In[6]:
-
-
-# def htest(model,epoch, test_loader, status, BS):
 def test(model, test_loader, shape, device):
     """
     5class test function (new).
     """
 
     model.eval()
-    # testLoss = 0
-    # testCorrect = 0
-    # testTotal=0
-    # bs=BS
-    # TP=[0]*7
-    # FP=[0]*7
-    # FN=[0]*7
 
     result=[]
-    # classes = set()
+    
     # Don't update model
     with torch.no_grad():
         predList=[]
         targetList=[]
+        
         # Predict
         reconstructed=np.zeros(shape)
         for batch_index, batch_samples in enumerate(test_loader):
@@ -189,59 +161,7 @@ def test(model, test_loader, shape, device):
                 reconstructed[x:x+1+1,y:y+1+1,z]=pred[k,0,:,:]
                 # classes.add(pred[k,0,:,:])
 
-            # loss, correct, total = evaluation(output, target, TP, FP, FN)
-            # testCorrect+=correct
-            # testLoss+=loss
-            # testTotal+=total
-
-            # if (batch_index+1) % (100) == 0:
-            #     print('{} Epoch: {} [{}/{} ({:.0f}%)]\tTest Loss: {:.6f} Current accuracy: {:.3f}%'.format(status,
-            #         epoch, batch_index+1, len(test_loader),
-            #         100.0 * batch_index / len(test_loader), testLoss.item()/(batch_index+1), testCorrect/testTotal*100))
-
-
-    # print('{} Epoch {}: Correct point: {}/{}, {}'.format(status, epoch, testCorrect, testTotal, testCorrect/testTotal*100))
-    # for i in range(1,5):
-    #     print('    Dice score for class{}: {}'.format(i, 2*TP[i]/(2*TP[i]+FP[i]+FN[i])))
-
-
-    # return testLoss, testCorrect, testTotal, TP, FN, FP
-    # print(f"{classes=}")
     return reconstructed
-
-# def test(model, test_loader, shape, device):
-
-#     model.eval()
-
-#     # Don't update model
-# #     print(len(test_loader))
-#     with torch.no_grad():
-#         predUnique={}
-#         targetUnique={}
-#         # Predict
-        
-#         reconstructed=np.zeros(shape)
-# #         probScore=np.zeros((4, shape[0], shape[1],shape[2]))
-#         for batch_index, batch_samples in enumerate(test_loader):
-#             data, pos = batch_samples['img'].to(device, dtype=torch.float), batch_samples['pos']
-#             output = model(data)
-#             softmax=nn.Softmax(dim=1)
-#             output=torch.reshape(output,(output.shape[0], 4, 2, 2))
-            
-#             output=softmax(output)
-#             pred=output.argmax(dim=1, keepdim=True).cpu()
-
-#             N=output.shape[0]
-
-#             for k in range(N):
-
-#                 x, y, z=pos[k][0].item(), pos[k][1].item(), pos[k][2].item()
-
-#                 # reconstructed[x:x+1+1,y:y+1+1,z]=pred[k,0,:,:].cpu()
-#                 reconstructed[x:x+1+1,y:y+1+1,z]=pred[k,0,:,:]
-                
-            
-#     return reconstructed
 
 def loadModel(modelPath, device):
     ResNet=torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=False)
@@ -257,7 +177,7 @@ def checkDevice(device):
 
 def runTest(imgName, outputPath, dataPath, betPath, device, BS, model):
       
-#     BS=200
+    # BS=200
 
     # dataPath=os.path.join(dataPath,'{}.nii.gz'.format(imgName))     
  
@@ -270,11 +190,6 @@ def runTest(imgName, outputPath, dataPath, betPath, device, BS, model):
     test_loader = DataLoader(testDataset, batch_size=BS, num_workers=1, drop_last=False, shuffle=False)
     shape=testDataset.imageShape
 
-#     print(testDataset.__len__())
-
-
-
-    # In[15]:
     print('Start Running:', imgName)
     import time
 
@@ -282,34 +197,27 @@ def runTest(imgName, outputPath, dataPath, betPath, device, BS, model):
 
     reconstructed=test(model, test_loader, shape, device)
     # changeClass(reconstructed)
-#     np.save('reconstructed/probScore_{}_{}.npy'.format(modelname, imgName), probScore)
-#     correct, total, TP, FP, FN=diceScore(reconstructed, testDataset.annotation)
     
     print(imgName, end=' ')
-#     print('Correct point: {}/{}, {}'.format(correct, total, correct/total*100))   
-#     for i in range(1,7):
-#         if TP[i]+FP[i]+FN[i]==0: continue
 #         print('    Dice score for class{}: {}'.format(i, 2*TP[i]/(2*TP[i]+FP[i]+FN[i])))    
         
-#     img = nib.Nifti1Image(reconstructed, np.eye(4))
-#     nib.save(img, 'reconstructed/reconstructed_{}_{}.nii.gz'.format(modelname, imgName))  
-#     print('Save to: reconstructed_{}_{}.nii.gz'.format(modelname, imgName))
+    # img = nib.Nifti1Image(reconstructed, np.eye(4))
+    # nib.save(img, 'reconstructed/reconstructed_{}_{}.nii.gz'.format(modelname, imgName))  
+    # print('Save to: reconstructed_{}_{}.nii.gz'.format(modelname, imgName))
 
     result_noNoise=eliminateNoise(reconstructed, minArea=64)                
     # result_noNoise = reconstructed
-#     correct, total, TP, FP, FN=diceScore(result_noNoise, testDataset.annotation)
+    
     saveImage(result_noNoise, os.path.join(outputPath, 'reconstructed_{}.nii.gz'.format(imgName)))    
-#     # In[16]:
 
     end = time.time()
     print('Elapsed time:', end - start)
 
     return 'reconstructed_{}.nii.gz'.format(imgName)
-# In[ ]:
+
 def saveImage(image, name):
     img = nib.Nifti1Image(image, np.eye(4))
     nib.save(img, name )
-
 
 def eliminateNoise(label, minArea=16):
     neighbors=[(-1,0),(1,0),(0,-1),(0,1)]
@@ -362,51 +270,17 @@ def eliminateNoise(label, minArea=16):
 
     return newLabel
 
-def diceScore(imgName, initial, gtPath):
-    gtPath=os.path.join(gtPath,'Final_{}.nii.gz'.format(imgName))
-    final = nib.load(gtPath).get_fdata()
-
-    correct=0
-    total=0
-    TP=[0]*7
-    FP=[0]*7
-    FN=[0]*7
-    
-    for i in range(initial.shape[0]):
-        for j in range(initial.shape[1]):
-            for k in range(initial.shape[2]):
-                if final[i,j,k]==0 and initial[i,j,k]==0: continue
-                total+=1
-                if initial[i,j,k]==final[i,j,k]:
-                    TP[int(final[i,j,k])]+=1
-
-                    correct+=1
-
-                else:
-                    FN[int(final[i,j,k])]+=1
-                    FP[int(initial[i,j,k])]+=1
-
-    print('Correct point: {}/{}, Accuracy : {}'.format(correct, total, correct/total*100))   
-    for i in range(1,5):
-        if TP[i]+FP[i]+FN[i]==0: continue
-        print('    Dice score for class{}: {}'.format(i, 2*TP[i]/(2*TP[i]+FP[i]+FN[i]))) 
-
-    return correct, total, TP, FP, FN
-
-def changeClass(annotation):
+# def changeClass(annotation):
    
-    for z in range(annotation.shape[2]):
-        for x in range(annotation.shape[0]):
-            for y in range(annotation.shape[1]):
+#     for z in range(annotation.shape[2]):
+#         for x in range(annotation.shape[0]):
+#             for y in range(annotation.shape[1]):
 
-                if annotation[x,y,z]==3:
-                    annotation[x,y,z]=4
-
+#                 if annotation[x,y,z]==3:
+#                     annotation[x,y,z]=4
 
 
 if __name__=='__main__':
-                    
-
 
     imgName='Norm_old_003_96yo'
     # from torchsummary import summary

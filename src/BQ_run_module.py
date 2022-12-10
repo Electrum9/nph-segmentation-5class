@@ -17,6 +17,6 @@ def run_module(input_path_dict, output_folder_path):
                                                     # modelPath = pathlib.Path.cwd() / 'src' / 'model_backup/epoch49_ResNet2D3Class_2Layer2x2_mixed2_300.pt',
                                                     modelPath = pathlib.Path.cwd() / 'src' / 'model_backup/epoch149_ResNet2D5Class.pt',
                                                     rdir = pathlib.Path("/module/src"))
-    log.info("Finished computing result")
+    log.info("Finished computing result!")
 
     return output_paths_dict
