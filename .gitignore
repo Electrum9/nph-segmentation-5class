@@ -1,2 +1,11 @@
+# Data Files
 *.txt
 *.zip
+src/skull-strip/*
+src/reconstructed/*
+
+# Python
+*.pyc
+
+# Miscellaneous
+.DS_Store
