@@ -58,7 +58,7 @@ def main(input_path, output_path, rdir, betPath=pathlib.Path('/module/src/skull-
 if __name__== "__main__":
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--modelPath', default='model_backup/epoch149_ResNet2D5Class.pt')
+    parser.add_argument('--modelPath', default='model_backup/epoch50_2Dresnet_skullstrip5Class.pt')
     parser.add_argument('--outputPath', default='reconstructed')
     parser.add_argument('--dataPath', default='data-split/Scans')
     parser.add_argument('--betPath', default='data-split/skull-strip')
