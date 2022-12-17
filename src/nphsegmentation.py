@@ -10,6 +10,8 @@ import CTtools
 from subprocess import call
 import sys
 from postSkullStrip import postSkullStrip
+import nibabel as nib
+import numpy as np
 
 
 def skull_strip(inName, outName):
