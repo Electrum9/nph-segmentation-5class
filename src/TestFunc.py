@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -191,7 +192,6 @@ def runTest(imgName, outputPath, dataPath, betPath, device, BS, model):
     shape=testDataset.imageShape
 
     print('Start Running:', imgName)
-    import time
 
     start = time.time()
 
@@ -205,7 +205,9 @@ def runTest(imgName, outputPath, dataPath, betPath, device, BS, model):
     # nib.save(img, 'reconstructed/reconstructed_{}_{}.nii.gz'.format(modelname, imgName))  
     # print('Save to: reconstructed_{}_{}.nii.gz'.format(modelname, imgName))
 
-    result_noNoise=eliminateNoise(reconstructed, minArea=64)                
+    # result_noNoise=eliminateNoise(reconstructed, minArea=64)                
+    result_noNoise=eliminateNoise(reconstructed, minArea=32)                
+    # result_noNoise=eliminateNoise(reconstructed, minArea=80)                
     # result_noNoise = reconstructed
     
     saveImage(result_noNoise, os.path.join(outputPath, 'reconstructed_{}.nii.gz'.format(imgName)))    
